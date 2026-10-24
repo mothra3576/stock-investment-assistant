@@ -10,6 +10,16 @@ import { Home } from "./components/Home";
 import { Tools } from "./components/Tools";
 import { LessonView } from "./components/LessonView";
 type Page = "home" | "learn" | "history" | "tools";
+// Answers are append-only. A delayed read must not erase a newly committed answer.
+// Merge by ID also avoids duplicate history when a read already contains our save.
+function mergeAttempts(current: Attempt[], records: Attempt[]): Attempt[] {
+  return [
+    ...new Map(
+      [...current, ...records].map((record) => [record.id, record]),
+    ).values(),
+  ];
+}
+
 export default function App() {
   const [page, setPage] = useState<Page>("home");
   const [lessonId, setLessonId] = useState<string | null>(null);
@@ -17,15 +27,35 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   useEffect(() => {
-    progressRepository
-      .list()
-      .then(setAttempts)
-      .catch(() =>
-        setError(
-          "学習記録を読み込めませんでした。Safariの保存設定を確認して再読み込みしてください。",
-        ),
-      )
-      .finally(() => setLoading(false));
+    let active = true;
+    let latestRequest = 0;
+    async function refresh() {
+      const request = ++latestRequest;
+      try {
+        const records = await progressRepository.list();
+        if (active && request === latestRequest) {
+          setAttempts((current) => mergeAttempts(current, records));
+          setError("");
+        }
+      } catch {
+        if (active && request === latestRequest) {
+          setError(
+            "学習記録を読み込めませんでした。Safariの保存設定を確認し、タブを開き直すか再読み込みしてください。",
+          );
+        }
+      } finally {
+        if (active && request === latestRequest) setLoading(false);
+      }
+    }
+    function onVisible() {
+      if (document.visibilityState === "visible") void refresh();
+    }
+    document.addEventListener("visibilitychange", onVisible);
+    void refresh();
+    return () => {
+      active = false;
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
   const completed = completedIds(attempts);
   const lesson = lessons.find((l) => l.id === lessonId);
@@ -49,13 +79,9 @@ export default function App() {
     };
     try {
       await progressRepository.add(attempt);
-      setAttempts((a) => [...a, attempt]);
-      setError("");
+      setAttempts((current) => mergeAttempts(current, [attempt]));
       return true;
     } catch {
-      setError(
-        "記録を保存できませんでした。空き容量やSafariの保存設定を確認し、再度回答してください。",
-      );
       return false;
     }
   }

@@ -724,3 +724,13 @@ footer a {
     scroll-behavior: auto !important;
   }
 }
+
+.quiz-actions {
+  scroll-margin-bottom: calc(100px + env(safe-area-inset-bottom));
+}
+.quiz-actions .error {
+  margin-bottom: 0;
+}
+.quiz-actions .error p {
+  color: inherit;
+}
