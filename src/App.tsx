@@ -7,9 +7,10 @@ import {
   type Attempt,
 } from "./storage/progress";
 import { Home } from "./components/Home";
+import { StockWorkspace } from "./components/stocks/StockWorkspace";
 import { Tools } from "./components/Tools";
 import { LessonView } from "./components/LessonView";
-type Page = "home" | "learn" | "history" | "tools";
+type Page = "home" | "learn" | "history" | "screen" | "tools";
 // Answers are append-only. A delayed read must not erase a newly committed answer.
 // Merge by ID also avoids duplicate history when a read already contains our save.
 function mergeAttempts(current: Attempt[], records: Attempt[]): Attempt[] {
@@ -103,6 +104,7 @@ export default function App() {
               ["home", "⌂", "ホーム"],
               ["learn", "▤", "学習する"],
               ["history", "◷", "学習履歴"],
+              ["screen", "⌕", "銘柄を調べる"],
               ["tools", "◇", "投資ツール"],
             ] as const
           ).map(([id, icon, label]) => (
@@ -228,6 +230,7 @@ export default function App() {
                   )}
                 </>
               )}
+              {page === "screen" && <StockWorkspace />}
               {page === "tools" && <Tools />}
             </>
           )}
