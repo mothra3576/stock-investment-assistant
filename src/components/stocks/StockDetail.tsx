@@ -12,29 +12,41 @@ export function StockDetail({
   stock,
   basis,
   onBack,
+  backLabel = "← スクリーニングに戻る",
 }: {
   stock: Stock;
   basis: Basis;
   onBack: () => void;
+  backLabel?: string;
 }) {
+  const masterFormat = (v: number | null | undefined, unit = "") =>
+    stock.masterAsOfDate && v == null ? "データなし" : formatValue(v, unit);
   const p = selectedPeriod(stock, basis),
     metrics = calculateMetrics(stock, basis),
     money = stock.currency === "JPY" ? "円" : "USD";
   return (
     <article>
       <button className="back" onClick={onBack}>
-        ← スクリーニングに戻る
+        {backLabel}
       </button>
       <h2>{stock.name}</h2>
       <p>
-        {stock.market} / {stock.code} / {stock.sector}
+        {stock.market} / {stock.code} / {stock.sector}{" "}
+        {stock.marketSegment && `/ ${stock.marketSegment}`}
       </p>
-      <section className="panel">
-        <h3>株価 {formatValue(stock.price, money)}</h3>
-        <p>
-          株価基準日：{stock.priceDate} / 更新日：{stock.updatedAt}
+      {stock.masterAsOfDate && (
+        <p className="storage-note">
+          本人取込マスターの基準日：{stock.masterAsOfDate}
+          。財務がない銘柄も表示します。
         </p>
-        <p>株価・時価総額の出典：{stock.quoteSource}</p>
+      )}
+      <section className="panel">
+        <h3>株価 {masterFormat(stock.price, money)}</h3>
+        <p>
+          株価基準日：{stock.priceDate ?? "データなし"} / 更新日：
+          {stock.updatedAt ?? "データなし"}
+        </p>
+        <p>株価・時価総額の出典：{stock.quoteSource || "データなし"}</p>
         <p>
           財務区分：<strong>{basisLabel(basis)}</strong> /{" "}
           {p
@@ -53,7 +65,7 @@ export function StockDetail({
             <div key={k}>
               <dt>{metricDefinitions[k].label}</dt>
               <dd>
-                {formatValue(
+                {masterFormat(
                   metrics[k],
                   k === "marketCap" ? `億${money}` : metricDefinitions[k].unit,
                 )}
@@ -75,7 +87,7 @@ export function StockDetail({
             <div key={label}>
               <dt>{label}</dt>
               <dd>
-                {formatValue(
+                {masterFormat(
                   value == null ? null : value / 1e6,
                   `百万${money}`,
                 )}
@@ -91,7 +103,7 @@ export function StockDetail({
           ).map(([label, value]) => (
             <div key={label}>
               <dt>{label}</dt>
-              <dd>{formatValue(value, money)}</dd>
+              <dd>{masterFormat(value, money)}</dd>
             </div>
           ))}
         </dl>

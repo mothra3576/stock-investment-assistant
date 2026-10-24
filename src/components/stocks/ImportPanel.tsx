@@ -6,10 +6,12 @@ export function ImportPanel({
   onImport,
   onSample,
   busy,
+  hasMaster = false,
 }: {
   onImport: (stocks: Stock[], fileName: string) => Promise<void>;
   onSample: () => Promise<void>;
   busy: boolean;
+  hasMaster?: boolean;
 }) {
   const [file, setFile] = useState<File | null>(null),
     [working, setWorking] = useState(false),
@@ -105,7 +107,11 @@ export function ImportPanel({
           setError("");
           void onSample()
             .then(() =>
-              setMessage("取込データを削除してサンプルに戻しました。"),
+              setMessage(
+                hasMaster
+                  ? "財務取込データを削除しました。マスターは維持します。"
+                  : "取込データを削除してサンプルに戻しました。",
+              ),
             )
             .catch(() =>
               setError("サンプルに戻せませんでした。再試行してください。"),
@@ -113,7 +119,9 @@ export function ImportPanel({
             .finally(() => setWorking(false));
         }}
       >
-        サンプルに戻す（取込データを削除）
+        {hasMaster
+          ? "財務取込データを削除（マスターは維持）"
+          : "サンプルに戻す（取込データを削除）"}
       </button>
     </details>
   );

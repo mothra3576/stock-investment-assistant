@@ -1,3 +1,7 @@
+import { masterRepository } from "../../storage/master";
+import { joinMaster } from "../../master/join";
+import { typeLabels } from "../../master/types";
+import type { MasterDatasetV2 } from "../../master/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   calculateMetrics,
@@ -20,13 +24,18 @@ import { ScreeningFilters } from "./ScreeningFilters";
 import { StockDetail } from "./StockDetail";
 import { StockComparison } from "./StockComparison";
 import { ImportPanel } from "./ImportPanel";
-export function StockWorkspace() {
+export function StockWorkspace({
+  initialSelection,
+  onBackToMaster,
+}: { initialSelection?: string | null; onBackToMaster?: () => void } = {}) {
+  const [master, setMaster] = useState<MasterDatasetV2 | null>(null);
+  const [resultPage, setResultPage] = useState(0);
   const [stocks, setStocks] = useState<Stock[]>([]),
     [dataset, setDataset] = useState<SavedDataset | null>(null),
     [watch, setWatch] = useState<WatchItem[]>([]),
     [conditions, setConditions] = useState({ ...defaultConditions }),
     [compared, setCompared] = useState<string[]>([]),
-    [selected, setSelected] = useState<string | null>(null),
+    [selected, setSelected] = useState<string | null>(initialSelection ?? null),
     [tab, setTab] = useState<"screen" | "compare" | "watch">("screen");
   const [loading, setLoading] = useState(true),
     [busy, setBusy] = useState(false),
@@ -45,12 +54,18 @@ export function StockWorkspace() {
     setLoading(true);
     setError("");
     try {
-      const [samples, saved] = await Promise.all([
+      const [samples, saved, savedMaster] = await Promise.all([
         sampleStockProvider.load(),
         analysisRepository.loadDataset(),
+        masterRepository.load(),
       ]);
       await loadWatch();
-      setStocks(saved?.stocks ?? samples);
+      setMaster(savedMaster);
+      setStocks(
+        savedMaster
+          ? joinMaster(savedMaster, saved?.stocks ?? [])
+          : (saved?.stocks ?? samples),
+      );
       setDataset(saved);
     } catch {
       setError(
@@ -108,7 +123,7 @@ export function StockWorkspace() {
     };
     await analysisRepository.saveDataset(saved);
     setDataset(saved);
-    setStocks(values);
+    setStocks(master ? joinMaster(master, values) : values);
     setConditions({ ...defaultConditions });
     setCompared([]);
     setSelected(null);
@@ -117,11 +132,12 @@ export function StockWorkspace() {
     const samples = await sampleStockProvider.load();
     await analysisRepository.saveDataset(null);
     setDataset(null);
-    setStocks(samples);
+    setStocks(master ? joinMaster(master, []) : samples);
     setCompared([]);
     setSelected(null);
     setConditions({ ...defaultConditions });
   }
+  useEffect(() => setResultPage(0), [conditions, stocks, tab]);
   function compare(id: string) {
     try {
       setCompared(toggleComparison(compared, id));
@@ -144,7 +160,9 @@ export function StockWorkspace() {
         <div className="stock-card-header">
           <div>
             <small>
-              {stock.code} · {stock.sector} · {stock.currency}
+              {stock.code} · {stock.sector} · {stock.currency}{" "}
+              {stock.marketSegment && ` / ${stock.marketSegment}`}{" "}
+              {stock.securityType && ` / ${typeLabels[stock.securityType]}`}
             </small>
             <h3>
               <button
@@ -162,8 +180,13 @@ export function StockWorkspace() {
         </div>
         <p>
           株価{" "}
-          {formatValue(stock.price, stock.currency === "JPY" ? "円" : "USD")} /
-          基準日 {stock.priceDate}
+          {stock.masterAsOfDate && stock.price === null
+            ? "データなし"
+            : formatValue(
+                stock.price,
+                stock.currency === "JPY" ? "円" : "USD",
+              )}{" "}
+          / 基準日 {stock.priceDate ?? "データなし"}
         </p>
         <dl className="metrics-grid compact">
           {(
@@ -176,7 +199,11 @@ export function StockWorkspace() {
           ).map(([label, value, unit]) => (
             <div key={label}>
               <dt>{label}</dt>
-              <dd>{formatValue(value, unit)}</dd>
+              <dd>
+                {stock.masterAsOfDate && value === null
+                  ? "データなし"
+                  : formatValue(value, unit)}
+              </dd>
             </div>
           ))}
         </dl>
@@ -186,7 +213,7 @@ export function StockWorkspace() {
             ? `${p.start}〜${p.end} / ${p.standard} / ${p.scope === "consolidated" ? "連結" : "単体"}`
             : "該当区分なし"}
           <br />
-          更新日：{stock.updatedAt}
+          更新日：{stock.updatedAt ?? "データなし"}
         </p>
         <div className="stock-actions">
           <button
@@ -215,14 +242,18 @@ export function StockWorkspace() {
       <h1>銘柄を調べる</h1>
       <aside className="data-banner">
         <strong>
-          {dataset
-            ? "ユーザー取込データ"
-            : "サンプルデータ（架空企業・架空数値）"}
+          {master
+            ? "本人取込の銘柄マスター（サンプルとは別）"
+            : dataset
+              ? "ユーザー取込データ"
+              : "サンプルデータ（架空企業・架空数値）"}
         </strong>
         <p>
-          {dataset
-            ? `${dataset.fileName} / 取込日時：${new Date(dataset.importedAt).toLocaleString("ja-JP")}。形式は検証済みですが、内容の正確性は保証しません。`
-            : "実在企業とは無関係です。銘柄選択や投資判断に使用しないでください。"}
+          {master
+            ? `${master.fileName} / マスター基準日：${master.asOfDate} / 最終更新日時：${new Date(master.importedAt).toLocaleString("ja-JP")}。財務は本人のv1取込データのみ紐付けます。架空サンプルの数値は使いません。`
+            : dataset
+              ? `${dataset.fileName} / 取込日時：${new Date(dataset.importedAt).toLocaleString("ja-JP")}。形式は検証済みですが、内容の正確性は保証しません。`
+              : "実在企業とは無関係です。銘柄選択や投資判断に使用しないでください。"}
         </p>
         <p>投資推奨・売買は行いません。価格はリアルタイムではありません。</p>
       </aside>
@@ -242,6 +273,7 @@ export function StockWorkspace() {
             onImport={importStocks}
             onSample={restoreSample}
             busy={busy}
+            hasMaster={!!master}
           />
           <div className="stock-tabs" role="group" aria-label="銘柄画面切替">
             {(
@@ -267,8 +299,16 @@ export function StockWorkspace() {
           {detail ? (
             <StockDetail
               stock={detail}
+              backLabel={
+                initialSelection && onBackToMaster
+                  ? "← 銘柄一覧に戻る"
+                  : undefined
+              }
               basis={conditions.basis}
-              onBack={() => setSelected(null)}
+              onBack={() => {
+                if (initialSelection && onBackToMaster) onBackToMaster();
+                else setSelected(null);
+              }}
             />
           ) : tab === "screen" ? (
             <>
@@ -290,7 +330,30 @@ export function StockWorkspace() {
                   </p>
                 </section>
               ) : (
-                <div className="stock-results">{rows.map(card)}</div>
+                <div className="stock-results">
+                  {rows.slice(resultPage * 50, (resultPage + 1) * 50).map(card)}
+                </div>
+              )}
+              {rows.length > 50 && (
+                <div className="pagination">
+                  <button
+                    className="secondary"
+                    disabled={resultPage === 0}
+                    onClick={() => setResultPage((p) => p - 1)}
+                  >
+                    前へ
+                  </button>
+                  <span>
+                    {resultPage + 1} / {Math.ceil(rows.length / 50)}ページ
+                  </span>
+                  <button
+                    className="secondary"
+                    disabled={(resultPage + 1) * 50 >= rows.length}
+                    onClick={() => setResultPage((p) => p + 1)}
+                  >
+                    次へ
+                  </button>
+                </div>
               )}
             </>
           ) : tab === "compare" ? (

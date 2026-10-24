@@ -1,3 +1,4 @@
+import { MasterPage } from "./components/master/MasterPage";
 import { useEffect, useState } from "react";
 import { lessons } from "./data/lessons";
 import {
@@ -10,7 +11,7 @@ import { Home } from "./components/Home";
 import { StockWorkspace } from "./components/stocks/StockWorkspace";
 import { Tools } from "./components/Tools";
 import { LessonView } from "./components/LessonView";
-type Page = "home" | "learn" | "history" | "screen" | "tools";
+type Page = "home" | "learn" | "history" | "screen" | "tools" | "master";
 // Answers are append-only. A delayed read must not erase a newly committed answer.
 // Merge by ID also avoids duplicate history when a read already contains our save.
 function mergeAttempts(current: Attempt[], records: Attempt[]): Attempt[] {
@@ -22,6 +23,7 @@ function mergeAttempts(current: Attempt[], records: Attempt[]): Attempt[] {
 }
 
 export default function App() {
+  const [masterSelection, setMasterSelection] = useState<string | null>(null);
   const [page, setPage] = useState<Page>("home");
   const [lessonId, setLessonId] = useState<string | null>(null);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
@@ -62,6 +64,7 @@ export default function App() {
   const lesson = lessons.find((l) => l.id === lessonId);
   function navigate(p: Page) {
     setPage(p);
+    setMasterSelection(null);
     setLessonId(null);
     window.scrollTo(0, 0);
   }
@@ -104,7 +107,8 @@ export default function App() {
               ["home", "⌂", "ホーム"],
               ["learn", "▤", "学習する"],
               ["history", "◷", "学習履歴"],
-              ["screen", "⌕", "銘柄を調べる"],
+              ["screen", "⌕", "銘柄分析"],
+              ["master", "▦", "銘柄一覧"],
               ["tools", "◇", "投資ツール"],
             ] as const
           ).map(([id, icon, label]) => (
@@ -230,7 +234,21 @@ export default function App() {
                   )}
                 </>
               )}
-              {page === "screen" && <StockWorkspace />}
+              {page === "screen" && (
+                <StockWorkspace
+                  initialSelection={masterSelection}
+                  onBackToMaster={() => navigate("master")}
+                />
+              )}
+              {page === "master" && (
+                <MasterPage
+                  onOpen={(id) => {
+                    setMasterSelection(id);
+                    setPage("screen");
+                    window.scrollTo(0, 0);
+                  }}
+                />
+              )}
               {page === "tools" && <Tools />}
             </>
           )}

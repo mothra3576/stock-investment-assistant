@@ -1010,3 +1010,72 @@ footer a {
 .stock-workspace > .error {
   scroll-margin-bottom: 100px;
 }
+.master-import .classification {
+  margin: 20px 0;
+  border: 1px solid #b9cbb2;
+  border-radius: 8px;
+  padding: 15px;
+}
+.classification label {
+  margin: 12px 0;
+}
+.import-preview {
+  padding: 18px;
+  background: #edf3e6;
+  border-radius: 8px;
+  margin-top: 20px;
+  overflow-wrap: anywhere;
+}
+.import-preview ul {
+  padding-left: 20px;
+  font-size: 13px;
+}
+.master-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.master-list .panel {
+  margin: 0;
+}
+.master-list small {
+  font-size: 11px;
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.pagination span {
+  font-size: 12px;
+}
+.master-import [role="alert"] {
+  color: #813f24;
+}
+.master-page .data-banner p {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 800px) {
+  .master-list {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 580px) {
+  nav button {
+    min-width: 0;
+    font-size: 9px;
+    gap: 3px;
+  }
+  nav button span {
+    font-size: 21px;
+  }
+  .pagination {
+    gap: 8px;
+  }
+  .master-import .table-scroll td {
+    max-width: 220px;
+  }
+}

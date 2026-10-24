@@ -15,6 +15,14 @@ export function StockComparison({
   basis: Basis;
   onRemove: (id: string) => void;
 }) {
+  const display = (
+    stock: Stock,
+    value: number | null | undefined,
+    unit = "",
+  ) =>
+    stock.masterAsOfDate && value == null
+      ? "データなし"
+      : formatValue(value, unit);
   return (
     <section className="panel">
       <h2>銘柄比較（{stocks.length}/5）</h2>
@@ -57,9 +65,9 @@ export function StockComparison({
                 <th>株価・基準日</th>
                 {stocks.map((s) => (
                   <td key={s.id}>
-                    {formatValue(s.price, s.currency === "JPY" ? "円" : "USD")}
+                    {display(s, s.price, s.currency === "JPY" ? "円" : "USD")}
                     <br />
-                    {s.priceDate}
+                    {s.priceDate ?? "データなし"}
                   </td>
                 ))}
               </tr>
@@ -85,7 +93,8 @@ export function StockComparison({
                   <th>{metricDefinitions[k].label}</th>
                   {stocks.map((s) => (
                     <td key={s.id}>
-                      {formatValue(
+                      {display(
+                        s,
                         calculateMetrics(s, basis)[k],
                         k === "marketCap"
                           ? `億${s.currency === "JPY" ? "円" : "USD"}`
@@ -99,11 +108,11 @@ export function StockComparison({
                 <th>出典・更新日</th>
                 {stocks.map((s) => (
                   <td key={s.id}>
-                    {s.quoteSource}
+                    {s.quoteSource || "データなし"}
                     <br />
                     {selectedPeriod(s, basis)?.source ?? "財務データなし"}
                     <br />
-                    {s.updatedAt}
+                    {s.updatedAt ?? "データなし"}
                   </td>
                 ))}
               </tr>

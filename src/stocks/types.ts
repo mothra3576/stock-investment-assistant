@@ -25,11 +25,14 @@ export interface Stock {
   sector: string;
   currency: "JPY" | "USD";
   price: number | null;
-  priceDate: string;
+  priceDate: string | null;
   marketCap: number | null;
   quoteSource: string;
-  updatedAt: string;
+  updatedAt: string | null;
   periods: FinancialPeriod[];
+  marketSegment?: string;
+  securityType?: import("../master/types").SecurityType;
+  masterAsOfDate?: string;
 }
 export type MetricKey =
   | "per"

@@ -41,7 +41,7 @@ const numeric = [
   "dividendPerShare",
 ] as const;
 export const MAX_FILE_BYTES = 2 * 1024 * 1024;
-function csvRows(text: string): string[][] {
+export function csvRows(text: string): string[][] {
   const rows: string[][] = [];
   let row: string[] = [],
     cell = "",
