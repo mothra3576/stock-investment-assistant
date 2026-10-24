@@ -734,3 +734,279 @@ footer a {
 .quiz-actions .error p {
   color: inherit;
 }
+/* Stock research: all table overflow stays within the scroll region. */
+.stock-workspace {
+  min-width: 0;
+}
+.data-banner {
+  background: #eaf1e5;
+  border: 1px solid #bfd0b5;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+}
+.data-banner strong {
+  color: #285c3d;
+}
+.data-banner p {
+  font-size: 12px;
+  margin-top: 7px;
+  color: #465f4a;
+}
+.stock-workspace details > summary {
+  cursor: pointer;
+  min-height: 44px;
+  font-weight: 600;
+  padding: 8px 0;
+}
+.stock-workspace input,
+.stock-workspace select {
+  display: block;
+  width: 100%;
+  min-height: 46px;
+  font: inherit;
+  font-size: 16px;
+  color: #243b30;
+  background: #fff;
+  border: 1px solid #b5c2b0;
+  border-radius: 7px;
+  padding: 9px;
+  max-width: 100%;
+  margin-top: 6px;
+}
+.stock-workspace label {
+  font-size: 12px;
+  font-weight: 600;
+  display: block;
+  min-width: 0;
+}
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 12px 0;
+}
+.ranges fieldset {
+  min-width: 0;
+  border: 1px solid #d6dfd0;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+}
+.ranges legend {
+  font-size: 13px;
+}
+.stock-workspace .storage-note {
+  margin: 12px 0;
+}
+.stock-workspace .panel {
+  overflow-wrap: anywhere;
+}
+.stock-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+.stock-tabs button {
+  margin: 0;
+  font-size: 12px;
+  flex: 1;
+  padding: 10px 8px;
+}
+.stock-tabs [aria-pressed="true"],
+.stock-actions [aria-pressed="true"] {
+  background: #e3eedc;
+  border-color: #517a4b;
+}
+.stock-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.stock-card {
+  margin: 0;
+}
+.stock-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.stock-card small,
+.stock-period {
+  font-size: 11px;
+}
+.stock-title {
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 5px 0;
+  min-height: 44px;
+  color: #255d3e;
+}
+.stock-card > p {
+  font-size: 12px;
+}
+.stock-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.stock-actions button {
+  font-size: 12px;
+  flex: 1;
+  padding: 8px;
+}
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+.metrics-grid > div {
+  background: #f2f5ed;
+  padding: 12px;
+  border-radius: 8px;
+  min-width: 0;
+}
+.metrics-grid dt {
+  font-size: 12px;
+  color: #52664f;
+}
+.metrics-grid dd {
+  margin: 4px 0 0;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+.metrics-grid.compact dd {
+  font-size: 14px;
+}
+.metric-help {
+  margin: 18px 0;
+}
+.metric-help h4 {
+  margin: 0;
+}
+.result-count {
+  font-weight: 600;
+  margin: 18px 0;
+}
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  border: 1px solid #d9e2d3;
+  border-radius: 8px;
+  margin-top: 18px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.table-scroll table {
+  border-collapse: collapse;
+  min-width: 560px;
+  width: 100%;
+  text-align: left;
+  font-size: 12px;
+}
+.table-scroll th,
+.table-scroll td {
+  border-bottom: 1px solid #dfe6d9;
+  vertical-align: top;
+  padding: 13px;
+  min-width: 130px;
+  overflow-wrap: anywhere;
+}
+.table-scroll th {
+  background: #f0f4e9;
+}
+.comparison th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 110px;
+}
+.comparison td,
+.comparison th:not(:first-child) {
+  min-width: 190px;
+}
+.financial-chart {
+  margin: 18px 0;
+}
+.financial-chart svg {
+  width: 100%;
+  height: auto;
+  font-size: 12px;
+}
+.financial-chart figcaption {
+  font-size: 12px;
+}
+.chart-revenue {
+  color: #276b56;
+}
+.chart-profit {
+  color: #925b19;
+}
+@media (max-width: 1000px) {
+  .stock-results {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 580px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+  .ranges {
+    grid-template-columns: 1fr;
+  }
+  .stock-workspace .panel {
+    padding: 18px;
+  }
+  .stock-tabs {
+    gap: 6px;
+  }
+  .stock-tabs button {
+    flex: auto;
+  }
+  .stock-card .metrics-grid {
+    gap: 8px;
+  }
+  .metrics-grid dd {
+    font-size: 15px;
+  }
+  .stock-workspace input[type="file"] {
+    font-size: 13px;
+  }
+  .data-banner {
+    padding: 16px;
+  }
+  .stock-title {
+    font-size: 17px;
+  }
+  nav button {
+    font-size: 9px;
+  }
+  .header {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+}
+.quick-range {
+  grid-column: 1/-1;
+}
+.quick-range input[type="range"] {
+  accent-color: #2c6946;
+  padding: 0;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+}
+.quick-range small {
+  font-weight: 400;
+  color: #52664f;
+}
+.stock-workspace > .error {
+  scroll-margin-bottom: 100px;
+}
